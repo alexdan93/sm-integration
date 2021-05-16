@@ -50,6 +50,7 @@ export default {
       const { mode, disabled } = this;
       return [
         { 'base-btn_disabled': mode === 'disabled' || disabled },
+        { 'base-btn_light': mode === 'light' },
       ];
     },
   },
@@ -74,6 +75,16 @@ export default {
   }
   &_disabled {
     pointer-events: none;
+  }
+  &_light {
+    width: 187px;
+    height: 50px;
+    background: #3387a3;
+    color: #fff;
+    transition: .6s;
+    &:hover {
+    background-color: #247f9e;
+  }
   }
 }
 </style>

@@ -1,14 +1,13 @@
 <template>
-  <div>
-    index
-  </div>
+  <div />
 </template>
 <script>
 export default {
-
+  created() {
+    this.$router.push('wallet');
+  },
 };
 </script>
 
 <style lang="scss" scoped>
-
 </style>

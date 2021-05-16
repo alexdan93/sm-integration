@@ -3,6 +3,12 @@
     <div class="primary__template template">
       <div class="template__header">
         Header
+        <base-btn
+          mode="light"
+          class="wallet__login"
+        >
+          Login
+        </base-btn>
       </div>
       <div class="template__content">
         <nuxt />
@@ -41,6 +47,11 @@ export default {
   height: 100%;
   min-height: 100vh;
   overflow: auto;
+  &__header {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
   &__content {
     display: flex;
     flex-direction: column;
