@@ -6,6 +6,7 @@
         <base-btn
           mode="light"
           class="wallet__login"
+          @click="login()"
         >
           Login
         </base-btn>
@@ -25,15 +26,24 @@
 export default {
   mounted() {
     // fake loader
-    this.SetLoader(true);
-    setTimeout(() => {
-      this.SetLoader(false);
-    }, 1000);
 
     // const r = await web3init()
     // if (r.ok) {
     // initContracts()
     // }
+  },
+  methods: {
+    async login() {
+      try {
+        this.SetLoader(true);
+        await this.$store.dispatch('web3/login');
+        await this.$store.dispatch('web3/initContracts');
+        this.SetLoader(false);
+      } catch (e) {
+        console.log('Login error :', e);
+        this.SetLoader(false);
+      }
+    },
   },
 };
 </script>
