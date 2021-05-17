@@ -29,6 +29,11 @@ export default {
     setTimeout(() => {
       this.SetLoader(false);
     }, 1000);
+
+    // const r = await web3init()
+    // if (r.ok) {
+    // initContracts()
+    // }
   },
 };
 </script>
