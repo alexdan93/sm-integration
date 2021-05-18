@@ -46,6 +46,6 @@ export default {
   },
 
   async transfer(instance, address, amount) {
-    return await transfer(instance, address, amount);
+    await transfer(instance, address, amount);
   },
 };

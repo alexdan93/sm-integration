@@ -33,33 +33,53 @@ export const initWeb3 = async () => {
       web4.setProvider(window.ethereum, userAddress);
       return userAddress;
     }
+    // eslint-disable-next-line
     window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!');
   } catch (e) {
-    console.log('web3Login error: ', e);
+    console.log('initWeb3 error: ', e);
     throw new Error(e);
   }
 };
 
 export const getInstances = async () => {
-  const abi = await web4.getContractAbstraction(ERC20);
-  const contracts = [
-    '0x4b107a23361770534bd1839171bbf4b0eb56485c',
-    '0xc13da4146d381c7032ca1ed6050024b4e324f4ef',
-    '0x8d0c36c8842d1dc9e49fbd31b81623c1902b7819',
-    '0xa364f66f40b8117bbdb772c13ca6a3d36fe95b13',
-  ];
+  try {
+    const abi = await web4.getContractAbstraction(ERC20);
+    const contracts = [
+      '0x4b107a23361770534bd1839171bbf4b0eb56485c',
+      '0xc13da4146d381c7032ca1ed6050024b4e324f4ef',
+      '0x8d0c36c8842d1dc9e49fbd31b81623c1902b7819',
+      '0xa364f66f40b8117bbdb772c13ca6a3d36fe95b13',
+    ];
 
-  instances = await Promise.all(
-    contracts.map((el) => abi.getInstance(el)),
-  );
-  return instances;
+    instances = await Promise.all(
+      contracts.map((el) => abi.getInstance(el)),
+    );
+    return instances;
+  } catch (e) {
+    console.log('getInstances error', e);
+    return e;
+  }
 };
 
-export const getBalance = async (instance) => await instance.balanceOf(userAddress);
+export const getBalance = async (instance) => {
+  try {
+    return await instance.balanceOf(userAddress);
+  } catch (e) {
+    console.log('getBalance error', e);
+    return e;
+  }
+};
 
 export const getAllowance = async (instance, address) => await instance.allowance(userAddress, address);
 
-export const getSymbol = async (instance) => await instance.symbol();
+export const getSymbol = async (instance) => {
+  try {
+    return await instance.symbol();
+  } catch (e) {
+    console.log('getSymbol error', e);
+    return e;
+  }
+};
 
 export const getDecimals = async (instance) => await instance.decimals();
 

@@ -19,7 +19,7 @@
       <span>Address</span>
       <div class="wallet__field">
         <input
-          v-model="address"
+          v-model="userAddress"
           class="wallet__input"
           type="text"
         >
@@ -48,14 +48,29 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   data() {
     return {
       amount: 0,
       address: '',
       currentCurrency: 'BUSD',
-      currencies: ['BUSD', 'TRX', 'WDX'],
+      currencies: [],
     };
+  },
+  computed: {
+    ...mapGetters({
+      balance: 'web3/getBalance',
+      allowance: 'web3/getAllowance',
+      contracts: 'web3/getContracts',
+      userAddress: 'web3/getUserAddress',
+    }),
+  },
+  methods: {
+    async getCurrencies() {
+      this.currencies = this.contracts.map(async (inst) => await this.$store.dispatch('web3/getSymbol', inst));
+    },
   },
 };
 </script>

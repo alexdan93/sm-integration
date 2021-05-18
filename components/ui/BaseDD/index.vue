@@ -5,6 +5,7 @@
       class="dd__title"
       :text="selected"
       variant="primary"
+      @click="$emit('click')"
     >
       <b-dropdown-item
         v-for="(item, i) in options"
