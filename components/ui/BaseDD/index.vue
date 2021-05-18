@@ -5,13 +5,12 @@
       class="dd__title"
       :text="selected"
       variant="primary"
-      @click="$emit('click')"
     >
       <b-dropdown-item
         v-for="(item, i) in options"
         :key="i"
         href="#"
-        @click="selected = item"
+        @click="selectItem(item)"
       >
         {{ item }}
       </b-dropdown-item>
@@ -25,9 +24,16 @@ export default {
       type: Array,
       default: () => [],
     },
-    selected: {
-      type: String,
-      default: '',
+  },
+  data() {
+    return {
+      selected: '',
+    };
+  },
+  methods: {
+    selectItem(item) {
+      this.selected = item;
+      this.$emit('click', item);
     },
   },
 };

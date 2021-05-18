@@ -39,6 +39,7 @@ export default {
         await this.$store.dispatch('web3/login');
         await this.$store.dispatch('web3/initContracts');
         this.SetLoader(false);
+        this.$router.push('/wallet');
       } catch (e) {
         console.log('Login error :', e);
         this.SetLoader(false);

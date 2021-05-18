@@ -57,7 +57,7 @@ export const getInstances = async () => {
     return instances;
   } catch (e) {
     console.log('getInstances error', e);
-    return e;
+    throw e;
   }
 };
 
@@ -66,18 +66,25 @@ export const getBalance = async (instance) => {
     return await instance.balanceOf(userAddress);
   } catch (e) {
     console.log('getBalance error', e);
-    return e;
+    throw e;
   }
 };
 
-export const getAllowance = async (instance, address) => await instance.allowance(userAddress, address);
+export const getAllowance = async (instance, address) => {
+  try {
+    return await instance.allowance(userAddress, address);
+  } catch (e) {
+    console.log('getAllowance error', e);
+    throw e;
+  }
+};
 
 export const getSymbol = async (instance) => {
   try {
     return await instance.symbol();
   } catch (e) {
     console.log('getSymbol error', e);
-    return e;
+    throw e;
   }
 };
 

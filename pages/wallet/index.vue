@@ -11,7 +11,7 @@
         <base-dd
           class="wallet__dd"
           :options="currencies"
-          :selected="currentCurrency"
+          @click="setData($event)"
         />
       </div>
     </div>
@@ -19,7 +19,7 @@
       <span>Address</span>
       <div class="wallet__field">
         <input
-          v-model="userAddress"
+          v-model="address"
           class="wallet__input"
           type="text"
         >
@@ -27,12 +27,15 @@
     </div>
     <div class="wallet__stats">
       <span class="wallet__text">balance</span>
-      <span class="wallet__text">0.0</span>
+      <span class="wallet__text">{{ balance }}</span>
       <span class="wallet__text">allowance</span>
-      <span class="wallet__text">0.0</span>
+      <span class="wallet__text">{{ allowance }}</span>
     </div>
     <div class="wallet__actions">
-      <base-btn mode="light">
+      <base-btn
+        mode="light"
+        @click="getCurrentCurrency()"
+      >
         Get allowance
       </base-btn>
       <base-btn mode="light">
@@ -55,8 +58,10 @@ export default {
     return {
       amount: 0,
       address: '',
+      balances: [],
       currentCurrency: 'BUSD',
       currencies: [],
+      allowances: [],
     };
   },
   computed: {
@@ -65,11 +70,39 @@ export default {
       allowance: 'web3/getAllowance',
       contracts: 'web3/getContracts',
       userAddress: 'web3/getUserAddress',
+      symbol: 'web3/getSymbol',
     }),
+  },
+  mounted() {
+    this.getCurrencies();
+    this.getBalances();
+    this.getAllowances();
+    this.address = this.userAddress;
   },
   methods: {
     async getCurrencies() {
-      this.currencies = this.contracts.map(async (inst) => await this.$store.dispatch('web3/getSymbol', inst));
+      this.currencies = await Promise.all(
+        this.contracts.map((el) => this.$store.dispatch('web3/getSymbol', el)),
+      );
+    },
+    async getBalances() {
+      this.balances = await Promise.all(
+        this.contracts.map((el) => this.$store.dispatch('web3/getBalance', el)),
+      );
+    },
+    async getAllowances() {
+      this.allowances = await Promise.all(
+        this.contracts.map((el) => this.$store.dispatch('web3/getAllowance', el)),
+      );
+    },
+    async setData(symbol) {
+      const idx = this.currencies.indexOf(symbol);
+      await Promise.all([
+        this.$store.dispatch('web3/getSymbol', this.contracts[idx]),
+        this.$store.dispatch('web3/getAllowance', this.contracts[idx], this.address),
+        this.$store.dispatch('web3/getDecimals', this.contracts[idx]),
+        this.$store.dispatch('web3/getBalance', this.contracts[idx]),
+      ]);
     },
   },
 };

@@ -2,9 +2,18 @@
   <div />
 </template>
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
+  computed: {
+    ...mapGetters({
+      userAddress: 'web3/getUserAddress',
+    }),
+  },
   created() {
-    this.$router.push('wallet');
+    if (this.userAddress) {
+      this.$router.push('wallet');
+    }
   },
 };
 </script>

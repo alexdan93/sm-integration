@@ -20,7 +20,7 @@
     v-else
     class="base-btn"
     :class="btnClass"
-    @click="$emit('click')"
+    @click.stop="$emit('click')"
   >
     <slot />
   </button>
