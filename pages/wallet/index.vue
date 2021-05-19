@@ -19,7 +19,7 @@
       <span>Address</span>
       <div class="wallet__field">
         <input
-          v-model="address"
+          v-model="userAddress"
           class="wallet__input"
           type="text"
         >
@@ -61,6 +61,7 @@ export default {
       balances: [],
       currentCurrency: 'BUSD',
       currencies: [],
+      decimals: [],
       allowances: [],
     };
   },
@@ -77,7 +78,6 @@ export default {
     this.getCurrencies();
     this.getBalances();
     this.getAllowances();
-    this.address = this.userAddress;
   },
   methods: {
     async getCurrencies() {
@@ -92,14 +92,19 @@ export default {
     },
     async getAllowances() {
       this.allowances = await Promise.all(
-        this.contracts.map((el) => this.$store.dispatch('web3/getAllowance', el)),
+        this.contracts.map((el) => this.$store.dispatch('web3/getAllowance', el, this.userAddress)),
+      );
+    },
+    async getDecimals() {
+      this.decimals = await Promise.all(
+        this.contracts.map((el) => this.$store.dispatch('web3/getBalance', el)),
       );
     },
     async setData(symbol) {
       const idx = this.currencies.indexOf(symbol);
       await Promise.all([
         this.$store.dispatch('web3/getSymbol', this.contracts[idx]),
-        this.$store.dispatch('web3/getAllowance', this.contracts[idx], this.address),
+        this.$store.dispatch('web3/getAllowance', this.contracts[idx], this.userAddress),
         this.$store.dispatch('web3/getDecimals', this.contracts[idx]),
         this.$store.dispatch('web3/getBalance', this.contracts[idx]),
       ]);
