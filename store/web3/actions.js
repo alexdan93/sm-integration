@@ -13,7 +13,6 @@ export default {
   async login({ commit }) {
     const userAddress = await initWeb3();
     commit('setUserAddress', userAddress);
-    return userAddress;
   },
 
   async initContracts({ commit }) {
@@ -22,14 +21,14 @@ export default {
     return contracts;
   },
 
-  async getBalance({ commit }, instance) {
-    const balance = await getBalance(instance);
+  async getBalance({ commit }) {
+    const balance = await getBalance();
     commit('setBalance', balance);
     return balance;
   },
 
-  async getAllowance({ commit }, instance, address) {
-    const allowance = await getAllowance(instance, address);
+  async getAllowance({ commit }, address) {
+    const allowance = await getAllowance(address);
     commit('setAllowance', allowance);
     return allowance;
   },
@@ -37,21 +36,26 @@ export default {
   async setAllowance({ commit }, instance, address, amount) {
     await setAllowance(instance, address, amount);
     commit('setAllowance', amount);
+    return amount;
   },
 
-  async getSymbol({ commit }, instance) {
-    const symbol = await getSymbol(instance);
+  async getSymbol({ commit }) {
+    const symbol = await getSymbol();
     commit('setSymbol', symbol);
     return symbol;
   },
 
-  async getDecimals({ commit }, instance) {
-    const decimals = await getDecimals(instance);
-    commit('setDecimals', decimals);
+  async getDecimals({ commit }) {
+    const decimals = await getDecimals();
+    await commit('setDecimals', decimals);
     return decimals;
   },
 
   async transfer(instance, address, amount) {
     await transfer(instance, address, amount);
+  },
+
+  setPickedData({ commit }, payload) {
+    return commit('setPickedData', payload);
   },
 };

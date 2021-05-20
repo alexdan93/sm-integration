@@ -17,4 +17,8 @@ export default {
   setDecimals(state, payload) {
     state.decimals = payload;
   },
+  setPickedData(state, { balance, allowance }) {
+    state.pickedData.balance = balance;
+    state.pickedData.allowance = allowance;
+  },
 };

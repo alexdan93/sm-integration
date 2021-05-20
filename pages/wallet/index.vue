@@ -1,5 +1,8 @@
 <template>
-  <div class="wallet">
+  <div
+    v-if="userAddress"
+    class="wallet"
+  >
     <div class="wallet__amount">
       <span>Amount</span>
       <div class="wallet__field">
@@ -19,7 +22,7 @@
       <span>Address</span>
       <div class="wallet__field">
         <input
-          v-model="userAddress"
+          :placeholder="userAddress"
           class="wallet__input"
           type="text"
         >
@@ -27,14 +30,13 @@
     </div>
     <div class="wallet__stats">
       <span class="wallet__text">balance</span>
-      <span class="wallet__text">{{ balance }}</span>
+      <span class="wallet__text">{{ pickedData.balance }}</span>
       <span class="wallet__text">allowance</span>
-      <span class="wallet__text">{{ allowance }}</span>
+      <span class="wallet__text">{{ pickedData.allowance }}</span>
     </div>
     <div class="wallet__actions">
       <base-btn
         mode="light"
-        @click="getCurrentCurrency()"
       >
         Get allowance
       </base-btn>
@@ -48,6 +50,17 @@
     <div class="wallet__trx">
       table
     </div>
+  </div>
+  <div
+    v-else
+    class="not-logged"
+  >
+    <base-btn
+      mode="light"
+      @click="login()"
+    >
+      Please, login with metamask
+    </base-btn>
   </div>
 </template>
 <script>
@@ -72,42 +85,48 @@ export default {
       contracts: 'web3/getContracts',
       userAddress: 'web3/getUserAddress',
       symbol: 'web3/getSymbol',
+      pickedData: 'web3/getPickedData',
     }),
   },
-  mounted() {
-    this.getCurrencies();
-    this.getBalances();
-    this.getAllowances();
-  },
   methods: {
+    async login() {
+      try {
+        this.SetLoader(true);
+        await this.getData();
+        this.SetLoader(false);
+      } catch (e) {
+        console.log('Login error :', e);
+        this.SetLoader(false);
+      }
+    },
     async getCurrencies() {
-      this.currencies = await Promise.all(
-        this.contracts.map((el) => this.$store.dispatch('web3/getSymbol', el)),
-      );
+      this.currencies = await this.$store.dispatch('web3/getSymbol');
     },
     async getBalances() {
-      this.balances = await Promise.all(
-        this.contracts.map((el) => this.$store.dispatch('web3/getBalance', el)),
-      );
+      this.balances = await this.$store.dispatch('web3/getBalance');
     },
     async getAllowances() {
-      this.allowances = await Promise.all(
-        this.contracts.map((el) => this.$store.dispatch('web3/getAllowance', el, this.userAddress)),
-      );
+      this.allowances = await this.$store.dispatch('web3/getAllowance', '0xBC6ae91F55af580B4C0E8c32D7910d00D3dbe54d');
     },
     async getDecimals() {
-      this.decimals = await Promise.all(
-        this.contracts.map((el) => this.$store.dispatch('web3/getBalance', el)),
-      );
+      this.decimals = await this.$store.dispatch('web3/getBalance');
+    },
+    async getData() {
+      await Promise.all([
+        this.$store.dispatch('web3/login'),
+        this.$store.dispatch('web3/initContracts'),
+        this.getCurrencies(),
+        this.getBalances(),
+        this.getAllowances(),
+        this.getDecimals(),
+      ]);
     },
     async setData(symbol) {
       const idx = this.currencies.indexOf(symbol);
-      await Promise.all([
-        this.$store.dispatch('web3/getSymbol', this.contracts[idx]),
-        this.$store.dispatch('web3/getAllowance', this.contracts[idx], this.userAddress),
-        this.$store.dispatch('web3/getDecimals', this.contracts[idx]),
-        this.$store.dispatch('web3/getBalance', this.contracts[idx]),
-      ]);
+      await this.$store.dispatch('web3/setPickedData', {
+        balance: this.balances[idx],
+        allowance: this.allowances[idx],
+      });
     },
   },
 };

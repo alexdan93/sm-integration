@@ -27,10 +27,10 @@ export const initWeb3 = async () => {
 
       if ((await web3.eth.getCoinbase()) === null) {
         await window.ethereum.enable();
+      } else {
+        userAddress = await web3.eth.getCoinbase();
+        web4.setProvider(window.ethereum, userAddress);
       }
-
-      userAddress = await web3.eth.getCoinbase();
-      web4.setProvider(window.ethereum, userAddress);
       return userAddress;
     }
     // eslint-disable-next-line
@@ -43,6 +43,7 @@ export const initWeb3 = async () => {
 
 export const getInstances = async () => {
   try {
+    web4.setProvider(window.ethereum, userAddress);
     const abi = await web4.getContractAbstraction(ERC20);
     const contracts = [
       '0x4b107a23361770534bd1839171bbf4b0eb56485c',
@@ -50,7 +51,6 @@ export const getInstances = async () => {
       '0x8d0c36c8842d1dc9e49fbd31b81623c1902b7819',
       '0xa364f66f40b8117bbdb772c13ca6a3d36fe95b13',
     ];
-
     instances = await Promise.all(
       contracts.map((el) => abi.getInstance(el)),
     );
@@ -61,35 +61,61 @@ export const getInstances = async () => {
   }
 };
 
-export const getBalance = async (instance) => {
+export const getBalance = async () => {
   try {
-    return await instance.balanceOf(userAddress);
+    instances = await getInstances();
+    return Promise.all(instances.map((el) => el.balanceOf(userAddress)));
   } catch (e) {
     console.log('getBalance error', e);
     throw e;
   }
 };
 
-export const getAllowance = async (instance, address) => {
+export const getAllowance = async (address) => {
   try {
-    return await instance.allowance(userAddress, address);
+    instances = await getInstances();
+    return await Promise.all(instances.map((el) => el.allowance(userAddress, address)));
   } catch (e) {
     console.log('getAllowance error', e);
     throw e;
   }
 };
 
-export const getSymbol = async (instance) => {
+export const getSymbol = async () => {
   try {
-    return await instance.symbol();
+    instances = await getInstances();
+    const res = await Promise.all(instances.map((el) => el.symbol()));
+    return res;
   } catch (e) {
     console.log('getSymbol error', e);
     throw e;
   }
 };
 
-export const getDecimals = async (instance) => await instance.decimals();
+export const getDecimals = async () => {
+  try {
+    instances = await getInstances();
+    return Promise.all(instances.map((el) => el.decimals()));
+  } catch (e) {
+    console.log('getDecimals error', e);
+    return e;
+  }
+};
 
-export const setAllowance = async (instance, address, amount) => await instance.approve(address, amount);
+export const setAllowance = async (instance, address, amount) => {
+  try {
+    return await instance.approve(instance, address, amount);
+  } catch (e) {
+    console.log(e);
+    return e;
+  }
+};
 
-export const transfer = async (instance, address, amount) => await instance.transfer(address, amount);
+export const transfer = async (instance, address, amount) => {
+  try {
+    return await instance.transfer(instance, address, amount);
+  } catch (e) {
+    console.log(e);
+    return e;
+  }
+};

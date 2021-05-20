@@ -6,7 +6,7 @@ export default {
   ssr: 'false',
   target: 'static',
   head: {
-    title: 'frontend-starter-kit-2',
+    title: 'sm-integration',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },

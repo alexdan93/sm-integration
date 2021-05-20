@@ -5,4 +5,5 @@ export default {
   getAllowance: (state) => state.allowance,
   getSymbol: (state) => state.symbol,
   getDecimals: (state) => state.decimals,
+  getPickedData: (state) => state.pickedData,
 };

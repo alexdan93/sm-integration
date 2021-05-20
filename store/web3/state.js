@@ -5,4 +5,8 @@ export default () => ({
   contracts: [],
   symbol: '',
   decimal: '',
+  pickedData: {
+    balance: null,
+    allowance: null,
+  },
 });
