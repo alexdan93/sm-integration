@@ -22,6 +22,7 @@
       <span>Address</span>
       <div class="wallet__field">
         <input
+          v-model="address"
           :placeholder="userAddress"
           class="wallet__input"
           type="text"
@@ -32,15 +33,19 @@
       <span class="wallet__text">balance</span>
       <span class="wallet__text">{{ pickedData.balance }}</span>
       <span class="wallet__text">allowance</span>
-      <span class="wallet__text">{{ pickedData.allowance }}</span>
+      <span class="wallet__text">{{ allowances[idx] || "" }}</span>
     </div>
     <div class="wallet__actions">
       <base-btn
         mode="light"
+        @click="getAllowance()"
       >
         Get allowance
       </base-btn>
-      <base-btn mode="light">
+      <base-btn
+        mode="light"
+        @click="setAllowance()"
+      >
         Set allowance
       </base-btn>
       <base-btn mode="light">
@@ -65,27 +70,30 @@
 </template>
 <script>
 import { mapGetters } from 'vuex';
+import BigNumber from 'bignumber.js';
 
 export default {
   data() {
     return {
       amount: 0,
-      address: '',
+      address: '0xBC6ae91F55af580B4C0E8c32D7910d00D3dbe54d',
       balances: [],
       currentCurrency: 'BUSD',
       currencies: [],
       decimals: [],
       allowances: [],
+      idx: null,
     };
   },
   computed: {
     ...mapGetters({
       balance: 'web3/getBalance',
-      allowance: 'web3/getAllowance',
       contracts: 'web3/getContracts',
+      allowance: 'web3/getAllowance',
       userAddress: 'web3/getUserAddress',
       symbol: 'web3/getSymbol',
       pickedData: 'web3/getPickedData',
+      decimal: 'web3/getDecimals',
     }),
   },
   methods: {
@@ -105,8 +113,18 @@ export default {
     async getBalances() {
       this.balances = await this.$store.dispatch('web3/getBalance');
     },
-    async getAllowances() {
-      this.allowances = await this.$store.dispatch('web3/getAllowance', '0xBC6ae91F55af580B4C0E8c32D7910d00D3dbe54d');
+    async getAllowance() {
+      if (this.idx !== null && this.address !== '') {
+        try {
+          this.allowances[this.idx] = await this.$store.dispatch('web3/getAllowance', {
+            instance: this.contracts[this.idx],
+            address: this.address,
+          });
+        } catch (e) {
+          console.log(e);
+          throw new Error(e);
+        }
+      }
     },
     async getDecimals() {
       this.decimals = await this.$store.dispatch('web3/getBalance');
@@ -117,16 +135,39 @@ export default {
         this.$store.dispatch('web3/initContracts'),
         this.getCurrencies(),
         this.getBalances(),
-        this.getAllowances(),
         this.getDecimals(),
       ]);
     },
+    balanceFromDecimals(balance, coin) {
+      if (coin === 'CFi') {
+        return new BigNumber(balance).shiftedBy(-18).toFixed(4);
+      } if (coin === 'VEE') {
+        return new BigNumber(balance).shiftedBy(-18).toFixed(4);
+      } if (coin === 'USDT') {
+        return new BigNumber(balance).shiftedBy(-6).toFixed(4);
+      } if (coin === 'DLD') {
+        return new BigNumber(balance).shiftedBy(-18).toFixed(4);
+      }
+      return balance;
+    },
     async setData(symbol) {
-      const idx = this.currencies.indexOf(symbol);
+      this.idx = this.currencies.indexOf(symbol);
       await this.$store.dispatch('web3/setPickedData', {
-        balance: this.balances[idx],
-        allowance: this.allowances[idx],
+        balance: this.balanceFromDecimals(this.balances[this.idx], symbol),
       });
+    },
+    async setAllowance() {
+      try {
+        await this.$store.dispatch('web3/setAllowance', {
+          instance: this.contracts[this.idx],
+          address: this.address,
+          amount: this.amount,
+        });
+      } catch (e) {
+        console.log(e);
+        return e;
+      }
+      return 'ok';
     },
   },
 };
@@ -134,6 +175,7 @@ export default {
 
 <style lang="scss" scoped>
 .wallet {
+  margin-top: 80px;
   width: 100%;
   height: 100%;
   display: flex;
@@ -179,5 +221,9 @@ export default {
   &__trx {
     margin: 50px 0;
   }
+}
+
+.not-logged {
+  margin-top: 80px;
 }
 </style>

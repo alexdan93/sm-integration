@@ -71,10 +71,10 @@ export const getBalance = async () => {
   }
 };
 
-export const getAllowance = async (address) => {
+export const getAllowance = async (instance, address) => {
   try {
     instances = await getInstances();
-    return await Promise.all(instances.map((el) => el.allowance(userAddress, address)));
+    return await instance.allowance(userAddress, address);
   } catch (e) {
     console.log('getAllowance error', e);
     throw e;
@@ -104,7 +104,7 @@ export const getDecimals = async () => {
 
 export const setAllowance = async (instance, address, amount) => {
   try {
-    return await instance.approve(instance, address, amount);
+    return await instance.approve(address, amount);
   } catch (e) {
     console.log(e);
     return e;

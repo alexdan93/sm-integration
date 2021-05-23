@@ -27,16 +27,12 @@ export default {
     return balance;
   },
 
-  async getAllowance({ commit }, address) {
-    const allowance = await getAllowance(address);
-    commit('setAllowance', allowance);
-    return allowance;
+  async getAllowance({ commit }, { instance, address }) {
+    return await getAllowance(instance, address);
   },
 
-  async setAllowance({ commit }, instance, address, amount) {
-    await setAllowance(instance, address, amount);
-    commit('setAllowance', amount);
-    return amount;
+  async setAllowance({ commit }, { instance, address, amount }) {
+    return await setAllowance(instance, address, amount);
   },
 
   async getSymbol({ commit }) {
@@ -51,7 +47,7 @@ export default {
     return decimals;
   },
 
-  async transfer(instance, address, amount) {
+  async transfer({ commit }, instance, address, amount) {
     await transfer(instance, address, amount);
   },
 
