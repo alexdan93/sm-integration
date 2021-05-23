@@ -48,7 +48,10 @@
       >
         Set allowance
       </base-btn>
-      <base-btn mode="light">
+      <base-btn
+        mode="light"
+        @click="transfer()"
+      >
         Transfer
       </base-btn>
     </div>
@@ -159,7 +162,7 @@ export default {
     async setAllowance() {
       try {
         await this.$store.dispatch('web3/setAllowance', {
-          instance: this.contracts[this.idx],
+          instance: await this.contracts[this.idx],
           address: this.address,
           amount: this.amount,
         });
@@ -168,6 +171,13 @@ export default {
         return e;
       }
       return 'ok';
+    },
+    async transfer() {
+      await this.$store.dispatch('web3/transfer', {
+        instance: await this.contracts[this.idx],
+        address: this.address,
+        amount: this.amount,
+      });
     },
   },
 };

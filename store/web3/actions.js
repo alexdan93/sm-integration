@@ -47,7 +47,7 @@ export default {
     return decimals;
   },
 
-  async transfer({ commit }, instance, address, amount) {
+  async transfer({ commit }, { instance, address, amount }) {
     await transfer(instance, address, amount);
   },
 
