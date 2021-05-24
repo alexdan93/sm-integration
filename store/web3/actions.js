@@ -11,8 +11,11 @@ import {
 
 export default {
   async login({ commit }) {
-    const userAddress = await initWeb3();
-    commit('setUserAddress', userAddress);
+    const { userAddress, instances } = await initWeb3();
+    commit('setData', {
+      userAddress,
+      instances,
+    });
   },
 
   async initContracts({ commit }) {
@@ -28,11 +31,13 @@ export default {
   },
 
   async getAllowance({ commit }, { instance, address }) {
-    return await getAllowance(instance, address);
+    const allowance = await getAllowance(instance, address);
+    commit('setAllowance', allowance);
   },
 
   async setAllowance({ commit }, { instance, address, amount }) {
-    return await setAllowance(instance, address, amount);
+    await setAllowance(instance, address, amount);
+    commit('setAllowance', amount);
   },
 
   async getSymbol({ commit }) {

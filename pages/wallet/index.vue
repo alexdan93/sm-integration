@@ -31,16 +31,16 @@
     </div>
     <div class="wallet__stats">
       <span class="wallet__text">balance</span>
-      <span class="wallet__text">{{ pickedData.balance }}</span>
+      <span class="wallet__text">{{ balanceFromDecimals(balances[idx]) || 0 }}</span>
       <span class="wallet__text">allowance</span>
-      <span class="wallet__text">{{ allowances[idx] || "" }}</span>
+      <span class="wallet__text">{{ allowance || "" }}</span>
     </div>
     <div class="wallet__actions">
       <base-btn
         mode="light"
-        @click="getAllowance()"
+        @click="updateWallet()"
       >
-        Get allowance
+        Update wallet
       </base-btn>
       <base-btn
         mode="light"
@@ -80,17 +80,15 @@ export default {
     return {
       amount: 0,
       address: '0xBC6ae91F55af580B4C0E8c32D7910d00D3dbe54d',
-      balances: [],
       currentCurrency: 'BUSD',
       currencies: [],
       decimals: [],
-      allowances: [],
       idx: null,
     };
   },
   computed: {
     ...mapGetters({
-      balance: 'web3/getBalance',
+      balances: 'web3/getBalance',
       contracts: 'web3/getContracts',
       allowance: 'web3/getAllowance',
       userAddress: 'web3/getUserAddress',
@@ -114,70 +112,57 @@ export default {
       this.currencies = await this.$store.dispatch('web3/getSymbol');
     },
     async getBalances() {
-      this.balances = await this.$store.dispatch('web3/getBalance');
+      await this.$store.dispatch('web3/getBalance');
     },
-    async getAllowance() {
+    async updateWallet() {
       if (this.idx !== null && this.address !== '') {
-        try {
-          this.allowances[this.idx] = await this.$store.dispatch('web3/getAllowance', {
-            instance: this.contracts[this.idx],
-            address: this.address,
-          });
-        } catch (e) {
-          console.log(e);
-          throw new Error(e);
-        }
+        this.SetLoader(true);
+        await this.$store.dispatch('web3/getAllowance', {
+          instance: this.contracts[this.idx],
+          address: this.address,
+        });
+        await this.getBalances();
       }
+      this.SetLoader(false);
     },
     async getDecimals() {
-      this.decimals = await this.$store.dispatch('web3/getBalance');
+      this.decimals = await this.$store.dispatch('web3/getDecimals');
     },
     async getData() {
+      await this.$store.dispatch('web3/login');
       await Promise.all([
-        this.$store.dispatch('web3/login'),
-        this.$store.dispatch('web3/initContracts'),
         this.getCurrencies(),
         this.getBalances(),
         this.getDecimals(),
       ]);
     },
-    balanceFromDecimals(balance, coin) {
-      if (coin === 'CFi') {
-        return new BigNumber(balance).shiftedBy(-18).toFixed(4);
-      } if (coin === 'VEE') {
-        return new BigNumber(balance).shiftedBy(-18).toFixed(4);
-      } if (coin === 'USDT') {
-        return new BigNumber(balance).shiftedBy(-6).toFixed(4);
-      } if (coin === 'DLD') {
-        return new BigNumber(balance).shiftedBy(-18).toFixed(4);
-      }
-      return balance;
+    balanceFromDecimals(balance) {
+      if (!balance) return 0;
+      return new BigNumber(parseInt(balance, 10)).shiftedBy(-this.decimals[this.idx]).toFixed(4);
     },
     async setData(symbol) {
       this.idx = this.currencies.indexOf(symbol);
       await this.$store.dispatch('web3/setPickedData', {
-        balance: this.balanceFromDecimals(this.balances[this.idx], symbol),
+        balance: this.balanceFromDecimals(this.balances[this.idx]),
       });
     },
     async setAllowance() {
-      try {
+      if (this.amount <= 0 && this.address !== '') {
         await this.$store.dispatch('web3/setAllowance', {
           instance: await this.contracts[this.idx],
           address: this.address,
           amount: this.amount,
         });
-      } catch (e) {
-        console.log(e);
-        return e;
       }
-      return 'ok';
     },
     async transfer() {
-      await this.$store.dispatch('web3/transfer', {
-        instance: await this.contracts[this.idx],
-        address: this.address,
-        amount: this.amount,
-      });
+      if (this.amount <= 0 && this.address !== '') {
+        await this.$store.dispatch('web3/transfer', {
+          instance: await this.contracts[this.idx],
+          address: this.address,
+          amount: new BigNumber(this.amount).shiftedBy(parseInt(this.decimals[this.idx], 10)),
+        });
+      }
     },
   },
 };

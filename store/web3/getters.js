@@ -6,4 +6,5 @@ export default {
   getSymbol: (state) => state.symbol,
   getDecimals: (state) => state.decimals,
   getPickedData: (state) => state.pickedData,
+  getHistory: (state) => state.history,
 };

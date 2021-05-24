@@ -1,8 +1,9 @@
 export default () => ({
   balance: 0,
   userAddress: '',
-  allowance: [],
+  allowance: null,
   contracts: [],
+  history: [],
   symbol: '',
   decimal: '',
   pickedData: {

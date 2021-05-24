@@ -1,6 +1,7 @@
 export default {
-  setUserAddress(state, payload) {
-    state.userAddress = payload;
+  setData(state, { userAddress, instances }) {
+    state.userAddress = userAddress;
+    state.contracts = instances;
   },
   setBalance(state, payload) {
     state.balance = payload;
