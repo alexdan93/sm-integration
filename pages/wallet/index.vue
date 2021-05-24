@@ -31,7 +31,7 @@
     </div>
     <div class="wallet__stats">
       <span class="wallet__text">balance</span>
-      <span class="wallet__text">{{ balanceFromDecimals(balances[idx]) || 0 }}</span>
+      <span class="wallet__text">{{ balanceFromDecimals(balances[idx]) || 0 }} <span>{{ symbol[idx] || '' }}</span></span>
       <span class="wallet__text">allowance</span>
       <span class="wallet__text">{{ allowance || "" }}</span>
     </div>
@@ -80,7 +80,6 @@ export default {
     return {
       amount: 0,
       address: '0xBC6ae91F55af580B4C0E8c32D7910d00D3dbe54d',
-      currentCurrency: 'BUSD',
       currencies: [],
       decimals: [],
       idx: null,
@@ -114,13 +113,18 @@ export default {
     async getBalances() {
       await this.$store.dispatch('web3/getBalance');
     },
+
+    async getAllowance() {
+      return await this.$store.dispatch('web3/getAllowance', {
+        instance: this.contracts[this.idx],
+        address: this.address,
+      });
+    },
+
     async updateWallet() {
       if (this.idx !== null && this.address !== '') {
         this.SetLoader(true);
-        await this.$store.dispatch('web3/getAllowance', {
-          instance: this.contracts[this.idx],
-          address: this.address,
-        });
+        await this.getAllowance();
         await this.getBalances();
       }
       this.SetLoader(false);
@@ -144,10 +148,11 @@ export default {
       this.idx = this.currencies.indexOf(symbol);
       await this.$store.dispatch('web3/setPickedData', {
         balance: this.balanceFromDecimals(this.balances[this.idx]),
+        allowance: await this.getAllowance(),
       });
     },
     async setAllowance() {
-      if (this.amount <= 0 && this.address !== '') {
+      if (this.amount > 0 && this.address !== '') {
         await this.$store.dispatch('web3/setAllowance', {
           instance: await this.contracts[this.idx],
           address: this.address,
@@ -156,7 +161,7 @@ export default {
       }
     },
     async transfer() {
-      if (this.amount <= 0 && this.address !== '') {
+      if (this.amount > 0 && this.address !== '') {
         await this.$store.dispatch('web3/transfer', {
           instance: await this.contracts[this.idx],
           address: this.address,

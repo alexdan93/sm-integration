@@ -8,5 +8,6 @@ export default () => ({
   decimal: '',
   pickedData: {
     balance: null,
+    allowance: null,
   },
 });

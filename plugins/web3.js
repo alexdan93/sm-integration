@@ -2,7 +2,6 @@ import Web3 from 'web3';
 import Web4 from '@cryptonteam/web4';
 import { ERC20 } from '~/abi/ERC20.js';
 
-let web3;
 let userAddress;
 let instances;
 
@@ -26,7 +25,7 @@ const getInstances = async () => {
 export const initWeb3 = async () => {
   try {
     if (window.ethereum) {
-      web3 = new Web3(window.ethereum);
+      const web3 = new Web3(window.ethereum);
 
       if ((await web3.eth.getCoinbase()) === null) {
         await window.ethereum.enable();
